@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DMP Listing",
+  "description": "A marketplace listing in the Distributed Marketplace Protocol",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^Qm[1-9A-Za-z]{44}$",
+      "description": "IPFS CID (base58 multihash)"
+    },
+    "mode": {
+      "enum": ["persistent", "ephemeral"],
+      "description": "Operational mode"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 100,
+      "minLength": 1,
+      "description": "Listing title"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2048,
+      "description": "Sanitized HTML description"
+    },
+    "seller": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{130}$",
+          "description": "ECDSA uncompressed public key in hex"
+        },
+        "cert": {
+          "type": "string",
+          "description": "Base64-encoded X.509 certificate (optional)"
+        }
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    },
+    "torrent": {
+      "type": "object",
+      "properties": {
+        "magnet": {
+          "type": "string",
+          "pattern": "^magnet:\\?",
+          "description": "Magnet URI"
+        },
+        "fileHash": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$",
+          "description": "SHA-256 file hash"
+        }
+      },
+      "required": ["magnet", "fileHash"],
+      "additionalProperties": false
+    },
+    "webpage": {
+      "type": "string",
+      "format": "uri",
+      "description": "External webpage for payment or details"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "maxItems": 5,
+      "description": "Category tags"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version (persistent mode)"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC creation timestamp"
+    },
+    "expiration": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC expiration (ephemeral only)"
+    },
+    "previousId": {
+      "type": "string",
+      "description": "Previous CID for persistent update chains"
+    },
+    "originalId": {
+      "type": "string",
+      "description": "Original CID for ephemeral re-posts"
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]+$",
+      "description": "ECDSA signature in hex (DER-encoded)"
+    }
+  },
+  "required": ["id", "mode", "title", "seller", "timestamp", "signature"],
+  "additionalProperties": false,
+  "if": {
+    "properties": {
+      "mode": { "const": "ephemeral" }
+    }
+  },
+  "then": {
+    "required": ["expiration"]
+  }
+}
